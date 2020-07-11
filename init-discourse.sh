@@ -1,9 +1,16 @@
 #!/bin/bash
 
-set -e
+DISCOURSE_COMMIT=544a9865c6e5890f37e762292cbe5558db843dcf
+DISRAPTOR_COMMIT=42bed979bc82a3044f99ddd1e15f176a78badf12
+
+git clone https://github.com/discourse/discourse.git /src
+cd /src
+git checkout $DISCOURSE_COMMIT
 
 cd /src/plugins
-git pull git@github.com:disraptor/disraptor.git
+git clone git@github.com:disraptor/disraptor.git
+cd /src/plugins/disraptor
+git checkout $DISRAPTOR_COMMIT
 
 USER=discourse
 RUBY_GLOBAL_METHOD_CACHE_SIZE=131072

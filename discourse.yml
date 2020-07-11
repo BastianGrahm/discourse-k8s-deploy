@@ -12,6 +12,18 @@ spec:
       targetPort: 9292
 ---
 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: discourse-postgres-data-pvc
+  labels:
+    app: tira-discourse
+spec:
+  resources:
+    requests:
+      storage: 20Gi
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,16 +42,42 @@ spec:
       - name: tira-discourse
         image: discourse/discourse_dev:release
         ports:
-          - hostIP: 0.0.0.0
-            hostPort: 9292
-            containerPort: 9292
+          containerPort: 9292
+          hostIP: 0.0.0.0
+          hostPort: 9292
         volumeMounts:
-          - mountPath: "/shared/postgres_data"
-            name: discourse-postgres-data
-          - mountPath: "/src"
-            name: discourse-src-code
-          - mountPath: "/init-discourse.sh"
-            name: init-discourse
+        - mountPath: "/shared/postgres_data"
+          name: discourse-postgres-data
+        - mountPath: "/init-discourse.sh"
+          name: init-discourse
+        env:
+        - name: DISCOURSE_COMMIT
+          value: 544a9865c6e5890f37e762292cbe5558db843dcf
+        - name: DISRAPTOR_COMMIT
+          value: 42bed979bc82a3044f99ddd1e15f176a78badf12
+        - name: USER
+          value: discourse
+        - name: RUBY_GLOBAL_METHOD_CACHE_SIZE
+          value: 131072
+        - name: LD_PRELOAD
+          value: /usr/lib/libjemalloc.so
+        - name: RAILS_ENV
+          value: ${RAILS_ENV:=development}
         lifecycle:
           postStart:
             exec:
+              command: ["/bin/bash", "-e", "-c", 
+              "git clone https://github.com/discourse/discourse.git /src
+              cd /src
+              git checkout $DISCOURSE_COMMIT
+              cd /src/plugins
+              git clone git@github.com:disraptor/disraptor.git
+              cd /src/plugins/disraptor
+              git checkout $DISRAPTOR_COMMIT
+              cd /src
+              bundle install
+              bundle exec rake db:migrate"]
+      volumes:
+      - name: discourse-postgres-data
+        persistentVolumeClaim:
+          claimName: discourse-postgres-data-pvc
