@@ -7,7 +7,7 @@ spec:
   selector:
     app: tira-discourse
   ports:
-    - nodePort: 30802
+    - nodePort: 30804
       port: 9292
       targetPort: 9292
 ---
@@ -19,6 +19,8 @@ metadata:
   labels:
     app: tira-discourse
 spec:
+  accessModes:
+    - ReadWriteOnce
   resources:
     requests:
       storage: 20Gi
@@ -42,14 +44,11 @@ spec:
       - name: tira-discourse
         image: discourse/discourse_dev:release
         ports:
-          containerPort: 9292
+        - containerPort: 9292
           hostIP: 0.0.0.0
-          hostPort: 9292
         volumeMounts:
         - mountPath: "/shared/postgres_data"
           name: discourse-postgres-data
-        - mountPath: "/init-discourse.sh"
-          name: init-discourse
         env:
         - name: DISCOURSE_COMMIT
           value: 544a9865c6e5890f37e762292cbe5558db843dcf
@@ -58,7 +57,7 @@ spec:
         - name: USER
           value: discourse
         - name: RUBY_GLOBAL_METHOD_CACHE_SIZE
-          value: 131072
+          value: "131072"
         - name: LD_PRELOAD
           value: /usr/lib/libjemalloc.so
         - name: RAILS_ENV
@@ -76,7 +75,8 @@ spec:
               git checkout $DISRAPTOR_COMMIT
               cd /src
               bundle install
-              bundle exec rake db:migrate"]
+              bundle exec rake db:migrate
+              bin/unicorn"]
       volumes:
       - name: discourse-postgres-data
         persistentVolumeClaim:
