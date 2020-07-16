@@ -10,20 +10,11 @@ spec:
     - nodePort: 30804
       port: 9292
       targetPort: 9292
----
-
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: discourse-postgres-data-pvc
-  labels:
-    app: tira-discourse
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
+#      name: unicorn
+#    - nodePort: 30805
+#      port: 1080
+#      targetPort: 1080
+#      name: mailcatcher
 ---
 
 apiVersion: apps/v1
@@ -46,27 +37,23 @@ spec:
         ports:
         - containerPort: 9292
           hostIP: 0.0.0.0
+#          name: unicorn
+#        - containerPort: 1080
+#          hostIP: 0.0.0.0
+#          name: mailcatcher
         volumeMounts:
         - mountPath: "/shared/postgres_data"
           name: discourse-postgres-data
         - mountPath: "/src"
           name: src-code
         env:
-        - name: DISCOURSE_COMMIT
-          value: 544a9865c6e5890f37e762292cbe5558db843dcf
-        - name: DISRAPTOR_COMMIT
-          value: 42bed979bc82a3044f99ddd1e15f176a78badf12
-        - name: USER
-          value: discourse
-        - name: RUBY_GLOBAL_METHOD_CACHE_SIZE
-          value: "131072"
-        - name: LD_PRELOAD
-          value: /usr/lib/libjemalloc.so
         - name: RAILS_ENV
           value: development
         - name: UNICORN_BIND_ALL
-          value: 'true'
-        command: ["/bin/bash", "-c", "for I in {001..129}; do DISCOURSE_DEV_HOSTS+=betaweb$I,; done; DISCOURSE_DEV_HOSTS+=betaweb130; /sbin/boot & sudo -E -u discourse -g discourse /bin/bash -c 'cd /src && USER=$USER RAILS_ENV=$RAILS_ENV bundle install && /src/bin/unicorn'"]
+          value: "true"
+        - name: DISCOURSE_DEV_HOSTS
+          value: ""
+        command: ["/bin/bash", "-c", "for I in {001..129}; do DISCOURSE_DEV_HOSTS+=betaweb$I,; done; DISCOURSE_DEV_HOSTS+=betaweb130; /sbin/boot & sudo -E -u discourse -g discourse /bin/bash -c \"cd /src && USER=discourse RAILS_ENV=$RAILS_ENV bundle install && /src/bin/unicorn\""]
       initContainers:
       - name: install-dependencies
         image: discourse/discourse_dev:release
