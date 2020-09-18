@@ -11,6 +11,10 @@ spec:
       port: 443
       targetPort: 443
       name: discourse-https
+    - nodePort: 30807
+      port: 80
+      targetPort: 80
+      name: discourse-http
 ---
 
 apiVersion: apps/v1
@@ -29,16 +33,24 @@ spec:
     spec:
       containers:
         - name: tira-discourse-prod
-          image: bastiangrahm/discourse-prod:0.0.1
+          image: docker.io/bastiangrahm/discourse-prod:0.0.3
           ports:
             - containerPort: 443
               hostIP: 0.0.0.0
               name: discourse-https
+            - containerPort: 80
+              hostIP: 0.0.0.0
+              name: discourse-http
           volumeMounts:
             - mountPath: "/shared"
               name: discourse-prod-data
             - mountPath: "/var/log"
               name: discourse-prod-log
+            - mountPath: "/resource"
+              name: resource
+            - mountPath: "/sbin/setup"
+              name: setup
+              subPath: setup
           env:
             - name: LANG
               value: "en_US.UTF-8"
@@ -84,9 +96,9 @@ spec:
                 secretKeyRef:
                   name: discourse-prod-secret
                   key: discourse_smtp_password
-            - name: DOCKER_HOST_IP
-              value: "172.17.0.1"
-          command: ["/sbin/boot"]
+            - name: DISCOURSE_SMTP_PORT
+              value: "587"
+          command: ["/bin/bash", "-c", "/sbin/setup; /sbin/boot"]
       volumes:
         - name: discourse-prod-data
           persistentVolumeClaim:
@@ -94,3 +106,19 @@ spec:
         - name: discourse-prod-log
           persistentVolumeClaim:
             claimName: discourse-prod-log-pvc
+        - name: resource
+          cephfs:
+            monitors:
+              - ceph.dw.webis.de
+            path: /storage/data-in-production/disraptor/boot/resource
+            user: webis
+            secretFile: "etc/ceph/ceph.client.webis.secret"
+            readOnly: true
+        - name: setup
+          cephfs:
+            monitors:
+              - ceph.dw.webis.de
+            path: /storage/data-in-production/disraptor/boot
+            user: webis
+            secretFile: "etc/ceph/ceph.client.webis.secret"
+            readOnly: true

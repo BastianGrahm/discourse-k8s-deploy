@@ -1,0 +1,12 @@
+#!/bin/bash
+
+### This script is to be placed in ceph under /storage/data-in-production/disraptor/boot/resource
+### It sets up the /shared/ directory in the container to have all the necessary data/rights for bootup
+
+for D in /resource/*; do
+    BASED_D = $(basename $D)
+    if [ -d /shared/$BASED_D ]
+    then
+        cp $D /shared/
+    fi
+done
