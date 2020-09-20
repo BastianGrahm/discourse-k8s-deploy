@@ -1,7 +1,7 @@
 # Deploy Discourse on Kubernetes
 
 ## Production environment
-The discourse production environent contains of
+The discourse production environent contains:
   - 1 Service                 ([prod/discourse-prod.yml](prod/discourse-prod.yml))
   - 1 Deployment              ([prod/discourse-prod.yml](prod/discourse-prod.yml))
   - 2 PersistentVolumeClaims  ([prod/discourse-prod-volumes.yml](prod/discourse-prod-volumes.yml))
@@ -32,8 +32,7 @@ Discourse instance is referring to.
 
 If this is the case click `SMTP Settings` on the left. Here you find SMTP server adress and port.
 
-Now only username and passwort are needed to use the SES server. If there already has been an entry for the domain you are working with chances are, that there also is
-an existing user. Best ask around your team.
+Now only username and passwort are needed to use the SES server. If there already has been an entry for the domain you are working with chances are, that there also is an existing user. Best ask around your team (User + Password are in the `passdb`).
 
 When there is no user yet you can create one at `Create My SMTP Credentials --> Create --> Show User SMTP Credentials`.
 
