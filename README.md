@@ -46,7 +46,7 @@ $ kubectl apply -f <name_of_your_choice>.yml
 
 #### Image
 The image for the Discourse instance gets created following the tutorial for [discourse_docker](https://github.com/discourse/discourse/blob/master/docs/INSTALL-cloud.md#Install-Discourse).
-I will repeat the steps here since there will be some differences
+I will repeat the steps here since there will be some differences.
 
 First clone the related repository.
 
@@ -56,7 +56,7 @@ $ sudo -s
 # cd /var/discourse
 ```
 
-Next use discourse_dockers launcher to setup the configuration for image creation. Here a file is created at `containers/app.yml`
+Next use discourse_dockers launcher to setup the configuration for image creation. Here a file is created at `containers/app.yml`.
 
 ```
 ./discourse-setup
@@ -104,7 +104,8 @@ You may need to change the image information in the Deployment configuration at 
 
 #### Ceph
 To mount certain boot-specific resources into the container we use a [CephFSVolumeSource](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#cephfsvolumesource-v1-core).
-Be sure CephFS mounted with the correct permissions (webisstud or webis). For information how to mount ceph follow [this](https://git.webis.de/code-generic/code-admin-knowledgebase/blob/master/services/ceph/cephfs-usage.md)
+Be sure CephFS mounted with the correct permissions (webisstud or webis). For information how to mount ceph follow [this](https://git.webis.de/code-generic/code-admin-knowledgebase/blob/master/services/ceph/cephfs-usage.md).
+
 Copy the corresponding files by:
 
 ```
