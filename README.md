@@ -97,7 +97,7 @@ You can now retag the image by your choice and push it to your docker registry.
 
 ```
 $ docker tag local_discourse/app:latest <USER>/<NAME>:<TAG>
-$ docker docker push <USER>/<NAME>:<TAG>
+$ docker push <USER>/<NAME>:<TAG>
 ```
 
 You may need to change the image information in the Deployment configuration at `spec.template.spec.containers.image` accordingly.
