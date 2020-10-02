@@ -1,12 +1,24 @@
 #!/bin/bash
 
-### This script is to be placed in ceph under /storage/data-in-production/disraptor/boot/resource
-### It sets up the /shared/ directory in the container to have all the necessary data/rights for bootup
-
 for D in /resource/*; do
-    BASED_D = $(basename $D)
-    if [ -d /shared/$BASED_D ]
+    BASED_D=$(basename $D)
+    if [ ! -d /shared/$BASED_D ]
     then
-        cp $D /shared/
+        cp -r $D /shared/
     fi
 done
+
+# owners
+chown -R discourse:www-data /shared/backups
+chown -R discourse:www-data /shared/tmp
+chown -R discourse:www-data /shared/uploads
+
+chown -R redis:redis /shared/redis_data
+
+chown -R postgres:postgres /shared/postgres_backup
+chown -R postgres:postgres /shared/postgres_data
+chown -R postgres:postgres /shared/postgres_run
+
+# timeouts
+sed -i s/"timeout 30"/"timeout 300"/g /var/www/discourse/config/unicorn.conf.rb
+sed -i '/include \/etc\/nginx\/sites-enabled\/\*;/a \\tproxy_send_timeout 300;\n\tproxy_read_timeout 300;' nginx.conf
