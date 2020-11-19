@@ -75,7 +75,7 @@ Let's Encrypt account email? (ENTER to skip) [me@example.com]:
 ```
 
 When filling these be sure to also overwrite the `SMTP port` with `587` (if your SMTP server listens to that), even when it seems to default to `587`. 
-If you don't there might be problems with sending mail, because Discourse (sometimes) uses 25 else. Requests on port 25 cannot reach AWS SES servers from the Webis network (for some reason).
+If you don't there might be problems with sending mail, because Discourse (sometimes) uses `25` else. Requests on port `25` cannot reach AWS SES servers from the Webis network (for some reason).
 
 If there is any error preventing you from finishing this setup don't worry. The file will still be created and we need to edit it now anyway.
 
