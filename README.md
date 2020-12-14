@@ -43,6 +43,7 @@ You may now fill in the gaps in the YAML above, save it under `<name_of_your_cho
 ```
 $ kubectl apply -f <name_of_your_choice>.yml
 ```
+Be aware that the name in `discourse-prod.yml` concerning the secret has to match that `<name_of_your_choice>`.
 
 #### Image
 The image for the Discourse instance gets created following the tutorial for [discourse_docker](https://github.com/discourse/discourse/blob/master/docs/INSTALL-cloud.md#Install-Discourse).
