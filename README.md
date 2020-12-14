@@ -43,6 +43,7 @@ You may now fill in the gaps in the YAML above, save it under `<name_of_your_cho
 ```
 $ kubectl apply -f <name_of_your_choice>.yml
 ```
+Be aware that the name in `discourse-prod.yml` concerning the secret has to match that `<name_of_your_choice>`.
 
 #### Image
 The image for the Discourse instance gets created following the tutorial for [discourse_docker](https://github.com/discourse/discourse/blob/master/docs/INSTALL-cloud.md#Install-Discourse).
@@ -75,9 +76,10 @@ Let's Encrypt account email? (ENTER to skip) [me@example.com]:
 ```
 
 When filling these be sure to also overwrite the `SMTP port` with `587` (if your SMTP server listens to that), even when it seems to default to `587`. 
-If you don't there might be problems with sending mail, because Discourse (sometimes) uses 25 else. Requests on port 25 cannot reach AWS SES servers from the Webis network (for some reason).
+If you don't there might be problems with sending mail, because Discourse (sometimes) uses `25` else. Requests on port `25` cannot reach AWS SES servers from the Webis network (for some reason).
 
-If there is any error preventing you from finishing this setup don't worry. The file will still be created and we need to edit it now anyway.
+**_IMPORTANT_**: If there occurs any error (which is very likely already at the domain check) you have to edit `containers/app.yml` yourself. If so, enter the information which is mentioned [above](https://github.com/BastianGrahm/discourse-k8s-deploy/blob/master/README.md#L68) at the position you find it in the file.
+When you entered them restart the building process via `./launcher rebuild app`. Do not skip this!
 
 So after the setup edit the file at `containers/app.yml` as follows:
 
@@ -137,10 +139,20 @@ $ prod/k8s-undeploy-discourse-prod.sh
 
 Your volumes will not be removed by this. Only `Service` and `Deployment` are defined in `prod/discourse-prod.yml` and therefore only these will be deleted here. This secures persistent data to be persistent across deploys.
 
-If you really want to remove them use (this will remove all your Discourse-related data:
+If you really want to remove them use (this will remove all your Discourse-related data):
 
 ```
 $ kubectl delete -f prod/discourse-prod-volumes.yml
 ```
+
+#### Updating
+After having done all the manual steps above one does not have to repeat them for updating the Discourse instance.
+This can be done via script, issueing:
+```
+prod/update-discourse.sh
+```
+which will create a new image with given Dockerhub imagename and tag.
+It will proceed to push the image to Dockerhub once with the tag you gave and once tagged as latest.
+The script will fail if the given tag already exists for the image so you don't override images.
 
 ## Development environment
