@@ -21,4 +21,7 @@ chown -R postgres:postgres /shared/postgres_run
 
 # timeouts
 sed -i s/"timeout 30"/"timeout 300"/g /var/www/discourse/config/unicorn.conf.rb
-sed -i '/include \/etc\/nginx\/sites-enabled\/\*;/a \\tproxy_send_timeout 300;\n\tproxy_read_timeout 300;' nginx.conf
+sed -i '/include \/etc\/nginx\/sites-enabled\/\*;/a \\tproxy_send_timeout 300;\n\tproxy_read_timeout 300;' /etc/nginx/nginx.conf
+
+# stop fonts route from getting rerouted
+sed -i s/"fonts|"/""/g /etc/nginx/conf.d/discourse.conf
