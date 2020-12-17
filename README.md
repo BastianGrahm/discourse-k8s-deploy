@@ -9,6 +9,19 @@ The discourse production environent contains:
   
 To deploy the files named basic scripts are provided.
 
+## By Script
+To deploy via script all you have to do by hand is fill the information sufficient for your service into `prod/data.yml`.
+**_NOTE_**: The `developer_emails` should be a comma-separated list of mails, not a yaml-list.
+**_CAUTION_**: Not giving all the information may lead to unexpected behavior.
+
+Next manipulate the information in the service configuration `prod/discourse-prod.yml`. Especially you may need to change NodePorts and image description.
+
+After filling the information issue
+```
+cd prod
+./setup-discourse -u <DOCKERHUB_USER> -i <DOCKERHUB_IMAGENAME>
+```
+
 ### Prerequisites
 #### Secret
 Before the deployment itself can be applied the secret containing SMTP information has to exist.
@@ -92,7 +105,7 @@ Everything is ready for image creation now. So leave the previously edited file 
 
 ```
 $ docker stop app && docker rm app
-# ./launcher rebuild <your_service_name`
+# ./launcher rebuild <your_service_name>
 ```
 
 An image will be created and a corresponding container will also be started. This might take a while.
@@ -100,7 +113,7 @@ An image will be created and a corresponding container will also be started. Thi
 You can now retag the image by your choice and push it to your docker registry.
 
 ```
-$ docker tag local_discourse/app:latest <USER>/<NAME>:<TAG>
+$ docker tag local_discourse/<your_service_name>:latest <USER>/<NAME>:<TAG>
 $ docker push <USER>/<NAME>:<TAG>
 ```
 
