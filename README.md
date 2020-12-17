@@ -11,7 +11,9 @@ To deploy the files named basic scripts are provided.
 
 ## By Script
 To deploy via script all you have to do by hand is fill the information sufficient for your service into `prod/data.yml`.
+
 **_NOTE_**: The `developer_emails` should be a comma-separated list of mails, not a yaml-list.
+
 **_CAUTION_**: Not giving all the information may lead to unexpected behavior.
 
 Next manipulate the information in the service configuration `prod/discourse-prod.yml`. Especially you may need to change NodePorts and image description.
@@ -22,6 +24,9 @@ cd prod
 ./setup-discourse -u <DOCKERHUB_USER> -i <DOCKERHUB_IMAGENAME>
 ```
 
+Everything should be set up now and the container should be running soon.
+
+## By Hand
 ### Prerequisites
 #### Secret
 Before the deployment itself can be applied the secret containing SMTP information has to exist.
