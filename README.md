@@ -1,5 +1,16 @@
 # Deploy Discourse on Kubernetes
 
+## Required
+Packages
+  - awk
+  - curl
+  - docker
+  - kubernetes
+  - git
+
+Misc
+  - webis Ceph Secret
+
 ## Production environment
 The discourse production environent contains:
   - 1 Service                 ([prod/discourse-prod.yml](prod/discourse-prod.yml))
