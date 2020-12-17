@@ -1,7 +1,7 @@
 #!/bin/bash
 
 _D="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BASE_DIRECTORY="$( cd "$( dirname "${DIR}" )" >/dev/null 2>&1 && pwd )"
+BASE_DIRECTORY="$( cd "$( dirname "${_D}" )" >/dev/null 2>&1 && pwd )"
 
 usage(){
     cat <<EOM
