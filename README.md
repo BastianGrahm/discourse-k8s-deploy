@@ -10,18 +10,31 @@ The discourse production environent contains:
 To deploy the files named basic scripts are provided.
 
 ## By Script
-To deploy via script all you have to do by hand is fill the information sufficient for your service into `prod/data.yml`.
+To deploy via script all you have to do by hand is fill the information sufficient for your service into `prod/data.yml`. Best create a copy with name `your_service_name.yml` for that.
 
 **_NOTE_**: The `developer_emails` should be a comma-separated list of mails, not a yaml-list.
 
 **_CAUTION_**: Not giving all the information may lead to unexpected behavior.
 
+It should look something like:
+```
+service:
+  name: "my_service"    
+hostname: "service.domain.io"                 
+developer_emails: "first@gmail.com,second@gmail.com"                          
+smtp:
+  address: "smtp.amazonaws.com"                     
+  username: "AKFHAKJSFJBKVAWUHFIA"                    
+  password: "KAWFdjwdjahWAHkaFHJwhja"                                            
+  port: 587
+```
+
 Next manipulate the information in the service configuration `prod/discourse-prod.yml`. Especially you may need to change NodePorts and image description.
 
 After filling the information issue
 ```
-cd prod
-./setup-discourse -u <DOCKERHUB_USER> -i <DOCKERHUB_IMAGENAME>
+$ cd prod
+$ ./setup-discourse -u <DOCKERHUB_USER> -i <DOCKERHUB_IMAGENAME> -f <your_service_name.yml>
 ```
 
 Everything should be set up now and the container should be running soon.
