@@ -60,7 +60,7 @@ $ sudo -s
 Next use discourse_dockers launcher to setup the configuration for image creation. Here a file is created at `containers/app.yml`.
 
 ```
-./discourse-setup
+# ./discourse-setup
 ```
 
 You will be asked for the following information:
@@ -83,6 +83,7 @@ When you entered them restart the building process via `./launcher rebuild app`.
 
 So after the setup edit the file at `containers/app.yml` as follows:
 
+  - rename the file to `<your_service_name>.yml`
   - make sure the information at `env`, which got asked for in the setup was entered correctly. Else please correct it.
   - at `hooks.after_code.exec.cmd` enter another listentry for Disraptor
     - `- git clone https://github.com/disraptor/disraptor.git`
@@ -90,7 +91,8 @@ So after the setup edit the file at `containers/app.yml` as follows:
 Everything is ready for image creation now. So leave the previously edited file and start the image and container creation.
 
 ```
-$ ./launcher rebuild app
+$ docker stop app && docker rm app
+# ./launcher rebuild <your_service_name`
 ```
 
 An image will be created and a corresponding container will also be started. This might take a while.
@@ -139,7 +141,7 @@ $ prod/k8s-undeploy-discourse-prod.sh
 
 Your volumes will not be removed by this. Only `Service` and `Deployment` are defined in `prod/discourse-prod.yml` and therefore only these will be deleted here. This secures persistent data to be persistent across deploys.
 
-If you really want to remove them use (this will remove all your Discourse-related data):
+**_If you really want to remove them use (this will remove all your Discourse-related data)_**:
 
 ```
 $ kubectl delete -f prod/discourse-prod-volumes.yml
@@ -149,9 +151,9 @@ $ kubectl delete -f prod/discourse-prod-volumes.yml
 After having done all the manual steps above one does not have to repeat them for updating the Discourse instance.
 This can be done via script, issueing:
 ```
-prod/update-discourse.sh
+# prod/update-discourse.sh -u <DOCKERHUB_USER> -i <DOCKERHUB_IMAGENAME> -t <TAG> -s <SERVICE_NAME>
 ```
-which will create a new image with given Dockerhub imagename and tag.
+which will rebuild the image for the given service with given Dockerhub imagename and tag.
 It will proceed to push the image to Dockerhub once with the tag you gave and once tagged as latest.
 The script will fail if the given tag already exists for the image so you don't override images.
 
