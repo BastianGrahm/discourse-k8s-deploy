@@ -5,18 +5,22 @@ BASE_DIRECTORY="$( cd "$( dirname "${_D}" )" >/dev/null 2>&1 && pwd )"
 
 usage(){
     cat <<EOM
-Usage: $(basename $0) -u USER -n IMAGENAME
-Build new IMAGENAME:0.0.1 and push it to Dockerhub at USER
+Usage: $(basename $0) -u USER -n IMAGENAME -f FILE
+Build new IMAGENAME:0.0.1 with information from FILE and push it to Dockerhub at USER
 
-Example: $(basename $0) -u webis -n tira
+Example: $(basename $0) -u webis -n tira -f tira.yml
 Mandatory arguments:
     -u, --user                  Dockerhub username
     -i, --image                 Dockerhub imagename
+    -f, --file                  File to read data from
 
 EOM
 }
 
+# checks if docker tag exists
+# needs login but credentials may be read from file later
 function docker_tag_exists() {
+    docker login
     curl --silent -f --head -lL https://hub.docker.com/v2/repositories/$1/tags/$2/ > /dev/null
 }
 
@@ -26,8 +30,11 @@ while [ "$1" != "" ]; do
         -u | --user )           shift
                                 DOCKERHUB_USER="$1"
                                 ;;
-        -i | --image )           shift
+        -i | --image )          shift
                                 DOCKERHUB_IMAGENAME="$1"
+                                ;;
+        -f | --file )           shift
+                                DATA_FILENAME="$1"
                                 ;;
         -h | --help )           usage
                                 exit
@@ -41,6 +48,7 @@ done
 # Test if all mandatory variables were set
 [ -z $DOCKERHUB_USER ] && usage &&  exit 1
 [ -z $DOCKERHUB_IMAGENAME ] && usage && exit 1
+[ -z $DATA_FILENAME ] && usage && exit 1
 DOCKERHUB_TAG="0.0.1"
 
 # Test if imagename:tag already exists on Dockerhub
@@ -48,6 +56,7 @@ if docker_tag_exists $DOCKERHUB_USER/$DOCKERHUB_IMAGENAME $DOCKERHUB_TAG; then
     echo "Combination $DOCKERHUB_IMAGENAME:$DOCKERHUB_TAG already exists for user $DOCKERHUB_USER"
     exit 1
 fi
+
 parse_yaml() {
    local prefix=$2
    local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
@@ -64,7 +73,7 @@ parse_yaml() {
    }'
 }
 
-eval $(parse_yaml data.yml "data_")
+eval $(parse_yaml $DATA_FILENAME "data_")
 
 # setup YAML for secret
 echo "apiVersion: v1
@@ -80,12 +89,13 @@ stringData:
 
 kubectl apply -f discourse_secret.yml
 
+# clone dicourse_docker repo to build image
 sudo -s
 git clone https://github.com/discourse/discourse_docker.git /var/discourse
 cd /var/discourse/
 
-echo "Waiting 10 seconds for command to reach input."
-./discourse-setup & sleep 10 ; kill $!
+echo "Waiting 5 seconds for command to reach input."
+./discourse-setup & sleep 5 ; kill $!
 
 # rebuild with given information
 sed -i s/"\'discourse.example.com\'"/"\'$data_hostname\'"/g containers/app.yml
@@ -99,16 +109,18 @@ sed -i s/"#DISCOURSE_SMTP_PORT"/"DISCOURSE_SMTP_PORT"/g containers/app.yml
 
 # make changes before rebuilding with Disraptor Plugin
 mv containers/app.yml containers/$data_service_name.yml
-
 sed -i 'docker_manager.git a\
     - git clone https://github.com/disraptor/disraptor.git' containers/$data_service_name.yml
 
+# rebuild again
 docker stop app && docker rm app
 ./launcher rebuild $data_service_name
 
+# Push to Dockerhub
 docker tag local_discourse/$data_service_name:latest $DOCKERHUB_USER/$DOCKERHUB_IMAGENAME:$DOCKERHUB_TAG
 docker push $DOCKERHUB_USER/$DOCKERHUB_IMAGENAME:$DOCKERHUB_TAG
 
+# setup files in Ceph to be present in container later
 echo "Mounting ceph with secret 'webis'"
 mount -t ceph -o name=webis,secretfile=/etc/ceph/ceph.client.webis.secret ceph.dw.webis.de:/storage /mnt/ceph/storage
 
@@ -116,4 +128,5 @@ cd $BASE_DIRECTORY
 cp /var/discourse/shared/standalone /mnt/ceph/storage/data-in-production/disraptor/boot/resource
 cp prod/setup /mnt/ceph/storage/data-in-production/disraptor/boot/setup
 
+# deploy
 prod/k8s-deploy-discourse-prod.sh
