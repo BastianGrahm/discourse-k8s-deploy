@@ -1,5 +1,8 @@
 #!/bin/bash
 
+_D="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BASE_DIRECTORY="$( cd "$( dirname "${DIR}" )" >/dev/null 2>&1 && pwd )"
+
 usage(){
     cat <<EOM
 Usage: $(basename $0) -u USER -n IMAGENAME -t TAG -s SERVICE
@@ -18,6 +21,7 @@ EOM
 }
 
 function docker_tag_exists() {
+    docker login
     curl --silent -f --head -lL https://hub.docker.com/v2/repositories/$1/tags/$2/ > /dev/null
 }
 
@@ -75,8 +79,7 @@ docker push $DOCKERHUB_USER/$DOCKERHUB_IMAGENAME:$DOCKERHUB_TAG
 docker tag local_discourse/$SERVICE_NAME:latest $DOCKERHUB_USER/$DOCKERHUB_IMAGENAME:latest
 docker push $DOCKERHUB_USER/$DOCKERHUB_IMAGENAME:latest
 
-
-cd ~/discourse-k8s-deploy
+cd $BASE_DIRECTORY
 
 # not sure if needed
 # mount -t ceph -o name=webis,secretfile=/etc/ceph/ceph.client.webis.secret ceph.dw.webis.de:/storage /mnt/ceph/storage
