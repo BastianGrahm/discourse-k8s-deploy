@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: tira-discourse-prod
-          image: docker.io/bastiangrahm/discourse-prod:latest
+          image: docker.io/bastiangrahm/discourse-prod:0.0.9
           ports:
             - containerPort: 443
               hostIP: 0.0.0.0
@@ -44,6 +44,8 @@ spec:
           volumeMounts:
             - mountPath: "/shared"
               name: discourse-prod-data
+            - mountPath: "/shared/backups"
+              name: backups
             - mountPath: "/var/log"
               name: discourse-prod-log
             - mountPath: "/resource"
@@ -101,8 +103,23 @@ spec:
           command: ["/bin/bash", "-c", "/sbin/setup; /sbin/boot"]
       volumes:
         - name: discourse-prod-data
-          persistentVolumeClaim:
-            claimName: discourse-prod-data-pvc
+#          persistentVolumeClaim:
+#            claimName: discourse-prod-data-pvc
+          cephfs:
+            monitors:
+              - ceph.dw.webis.de
+            path: /storage/data-in-production/disraptor/discourse/postgres-data
+            user: webis
+            secretFile: "etc/ceph/ceph.client.webis.secret"
+            readOnly: false
+        - name: backups 
+          cephfs:
+            monitors:
+              - ceph.dw.webis.de
+            path: /storage/data-in-production/disraptor/discourse/backup
+            user: webis
+            secretFile: "etc/ceph/ceph.client.webis.secret"
+            readOnly: false
         - name: discourse-prod-log
           persistentVolumeClaim:
             claimName: discourse-prod-log-pvc

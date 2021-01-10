@@ -6,5 +6,5 @@ then
     ./k8s-deploy-discourse-prod-volume.sh
     kubectl apply -f discourse-prod.yml
 else
-    echo "Secret 'discourse-prod-secret' does ont exist. Create first!"
+    echo "Secret 'discourse-prod-secret' does not exist. Create first!"
 fi
